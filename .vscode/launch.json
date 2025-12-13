@@ -1,0 +1,93 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "Client",
+      "presentation": {
+        "group": "Mod Development - minecraft-badges",
+        "order": 0
+      },
+      "projectName": "minecraft-badges",
+      "mainClass": "net.neoforged.devlaunch.Main",
+      "args": [
+        "@D:\\content\\polystirolhub\\minecraft-badges\\build\\moddev\\clientRunProgramArgs.txt"
+      ],
+      "vmArgs": [
+        "@D:\\content\\polystirolhub\\minecraft-badges\\build\\moddev\\clientRunVmArgs.txt",
+        "-Dfml.modFolders\u003dpolystirolbagdes%%D:\\content\\polystirolhub\\minecraft-badges\\bin\\main"
+      ],
+      "cwd": "${workspaceFolder}\\run",
+      "env": {},
+      "console": "internalConsole",
+      "shortenCommandLine": "none"
+    },
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "Data",
+      "presentation": {
+        "group": "Mod Development - minecraft-badges",
+        "order": 1
+      },
+      "projectName": "minecraft-badges",
+      "mainClass": "net.neoforged.devlaunch.Main",
+      "args": [
+        "@D:\\content\\polystirolhub\\minecraft-badges\\build\\moddev\\dataRunProgramArgs.txt"
+      ],
+      "vmArgs": [
+        "@D:\\content\\polystirolhub\\minecraft-badges\\build\\moddev\\dataRunVmArgs.txt",
+        "-Dfml.modFolders\u003dpolystirolbagdes%%D:\\content\\polystirolhub\\minecraft-badges\\bin\\main"
+      ],
+      "cwd": "${workspaceFolder}\\run",
+      "env": {},
+      "console": "internalConsole",
+      "shortenCommandLine": "none"
+    },
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "GameTestServer",
+      "presentation": {
+        "group": "Mod Development - minecraft-badges",
+        "order": 2
+      },
+      "projectName": "minecraft-badges",
+      "mainClass": "net.neoforged.devlaunch.Main",
+      "args": [
+        "@D:\\content\\polystirolhub\\minecraft-badges\\build\\moddev\\gameTestServerRunProgramArgs.txt"
+      ],
+      "vmArgs": [
+        "@D:\\content\\polystirolhub\\minecraft-badges\\build\\moddev\\gameTestServerRunVmArgs.txt",
+        "-Dfml.modFolders\u003dpolystirolbagdes%%D:\\content\\polystirolhub\\minecraft-badges\\bin\\main"
+      ],
+      "cwd": "${workspaceFolder}\\run",
+      "env": {},
+      "console": "internalConsole",
+      "shortenCommandLine": "none"
+    },
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "Server",
+      "presentation": {
+        "group": "Mod Development - minecraft-badges",
+        "order": 3
+      },
+      "projectName": "minecraft-badges",
+      "mainClass": "net.neoforged.devlaunch.Main",
+      "args": [
+        "@D:\\content\\polystirolhub\\minecraft-badges\\build\\moddev\\serverRunProgramArgs.txt"
+      ],
+      "vmArgs": [
+        "@D:\\content\\polystirolhub\\minecraft-badges\\build\\moddev\\serverRunVmArgs.txt",
+        "-Dfml.modFolders\u003dpolystirolbagdes%%D:\\content\\polystirolhub\\minecraft-badges\\bin\\main"
+      ],
+      "cwd": "${workspaceFolder}\\run",
+      "env": {},
+      "console": "internalConsole",
+      "shortenCommandLine": "none"
+    }
+  ]
+}
