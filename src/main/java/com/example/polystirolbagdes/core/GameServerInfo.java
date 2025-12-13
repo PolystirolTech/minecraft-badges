@@ -2,6 +2,8 @@ package com.example.polystirolbagdes.core;
 
 import java.util.UUID;
 
+import com.google.gson.annotations.SerializedName;
+
 public class GameServerInfo {
 	@SerializedName("id")
 	private UUID id;

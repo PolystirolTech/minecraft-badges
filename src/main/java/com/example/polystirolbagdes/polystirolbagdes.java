@@ -33,6 +33,7 @@ public class polystirolbagdes {
 	private ResourcePackManager resourcePackManager;
 	private ResourcePackHandler resourcePackHandler;
 	private BadgeCommands badgeCommands;
+	private BadgeEventHandler eventHandler;
 
 	public polystirolbagdes(IEventBus modEventBus, ModContainer modContainer) {
 		modEventBus.addListener(this::commonSetup);
@@ -49,12 +50,10 @@ public class polystirolbagdes {
 			// Инициализируем API клиент
 			String apiBaseUrl = Config.API_BASE_URL.get();
 			BadgeApiClient apiClient = new BadgeApiClient(apiBaseUrl);
-			LOGGER.info("API клиент инициализирован с URL: {}", apiBaseUrl);
 
 			// Инициализируем кэш
 			long cacheTtl = Config.CACHE_TTL_SECONDS.get();
 			BadgeCache cache = new BadgeCache(cacheTtl);
-			LOGGER.info("Кэш инициализирован с TTL: {} секунд", cacheTtl);
 
 			// Инициализируем сервис
 			badgeService = new BadgeService(apiClient, cache);
@@ -69,7 +68,6 @@ public class polystirolbagdes {
 				// так как нужен доступ к MinecraftServer
 				
 				resourcePackManager.startPeriodicCheck(() -> {
-					LOGGER.info("Resource pack обновлен, отправка всем игрокам...");
 					if (resourcePackHandler != null) {
 						resourcePackManager.getServerInfo()
 								.thenAccept(serverInfo -> {
@@ -83,14 +81,19 @@ public class polystirolbagdes {
 								});
 					}
 				});
-				LOGGER.info("Resource Pack Manager инициализирован для сервера: {}", serverId);
 			} else {
 				LOGGER.warn("serverId не настроен в конфиге, Resource Pack Manager не будет работать");
 			}
 
 			// Регистрируем обработчик событий (TAB интеграция будет инициализирована при первом использовании)
-			// resourcePackHandler будет установлен при старте сервера
-			NeoForge.EVENT_BUS.register(new BadgeEventHandler(badgeService, null));
+			BadgeEventHandler eventHandler = new BadgeEventHandler(badgeService);
+			NeoForge.EVENT_BUS.register(eventHandler);
+			
+			// Сохраняем ссылку
+			this.eventHandler = eventHandler;
+			
+			// Пробуем зарегистрировать TAB EventBus обработчик (может не получиться, если TAB еще не загружен)
+			TabIntegration.registerTabEventListener();
 
 			LOGGER.info("Minecraft Badges Mod успешно инициализирован!");
 		});
@@ -106,33 +109,15 @@ public class polystirolbagdes {
 
 	@SubscribeEvent
 	public void onServerStarting(ServerStartingEvent event) {
+		// Resource pack функционал отключен - управляется вручную через server.properties
+		// ResourcePackHandler и команды не инициализируются
+		
+		// Сохраняем ссылку на сервер для выполнения команд TAB
 		MinecraftServer server = event.getServer();
+		TabIntegration.setServer(server);
 		
-		// Инициализируем ResourcePackHandler при старте сервера
-		resourcePackHandler = new ResourcePackHandler(server);
-		
-		// Загружаем resource pack при старте сервера
-		if (resourcePackManager != null) {
-			resourcePackManager.getServerInfo()
-					.thenAccept(serverInfo -> {
-						if (serverInfo != null) {
-							String url = serverInfo.getResourcePackUrl();
-							String hash = serverInfo.getResourcePackHash();
-							if (url != null && !url.isEmpty()) {
-								LOGGER.info("Загрузка resource pack при старте сервера: {}", url);
-								resourcePackHandler.sendResourcePackToAllPlayers(url, hash);
-							}
-						}
-					});
-		}
-		
-		// Регистрируем команды
-		if (badgeCommands == null && resourcePackManager != null) {
-			badgeCommands = new BadgeCommands(resourcePackManager, resourcePackHandler);
-		}
-		if (badgeCommands != null) {
-			badgeCommands.register(event.getServer().getCommands().getDispatcher());
-			LOGGER.info("Команды badges зарегистрированы");
-		}
+		// Пробуем зарегистрировать TAB EventBus обработчик при старте сервера
+		// (TAB должен быть загружен к этому моменту)
+		TabIntegration.registerTabEventListener();
 	}
 }

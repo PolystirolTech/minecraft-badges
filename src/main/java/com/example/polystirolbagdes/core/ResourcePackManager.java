@@ -57,20 +57,17 @@ public class ResourcePackManager {
 
 					String currentHash = serverInfo.getResourcePackHash();
 					if (currentHash == null || currentHash.isEmpty()) {
-						LOGGER.debug("Resource pack hash не установлен для сервера {}", serverId);
 						return;
 					}
 
 					if (lastKnownHash == null) {
 						// Первая проверка - сохраняем hash
 						lastKnownHash = currentHash;
-						LOGGER.info("Инициализирован resource pack hash: {}", currentHash);
 						if (onHashChanged != null) {
 							onHashChanged.run();
 						}
 					} else if (!lastKnownHash.equals(currentHash)) {
 						// Hash изменился
-						LOGGER.info("Обнаружено изменение resource pack hash: {} -> {}", lastKnownHash, currentHash);
 						lastKnownHash = currentHash;
 						if (onHashChanged != null) {
 							onHashChanged.run();

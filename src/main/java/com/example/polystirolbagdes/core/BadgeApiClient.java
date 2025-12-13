@@ -61,7 +61,6 @@ public class BadgeApiClient {
 					Throwable cause = throwable.getCause() != null ? throwable.getCause() : throwable;
 					if (cause instanceof ApiException apiException && apiException.getStatusCode() == 404) {
 						// 404 - нормальная ситуация, игрок не имеет бэйджика
-						LOGGER.debug("Игрок {} не имеет бэйджика (404)", playerUuid);
 						return null;
 					}
 					LOGGER.error("Ошибка при получении бэйджика игрока {}: {}", playerUuid, cause.getMessage());
@@ -127,7 +126,6 @@ public class BadgeApiClient {
 		}
 
 		long delay = (long) Math.pow(2, attempt); // Экспоненциальная задержка: 1, 2, 4 секунды
-		LOGGER.debug("Повторная попытка запроса через {} секунд (попытка {}/{})", delay, attempt + 1, MAX_RETRIES);
 
 		CompletableFuture<Void> delayFuture = new CompletableFuture<>();
 		scheduler.schedule(() -> delayFuture.complete(null), delay, TimeUnit.SECONDS);

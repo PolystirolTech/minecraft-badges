@@ -3,11 +3,7 @@ package com.example.polystirolbagdes.core;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class BadgeService {
-	private static final Logger LOGGER = LoggerFactory.getLogger(BadgeService.class);
 
 	private final BadgeApiClient apiClient;
 	private final BadgeCache cache;
@@ -34,14 +30,18 @@ public class BadgeService {
 				.thenApply(badge -> {
 					if (badge != null) {
 						cache.put(playerUuid, badge);
-						LOGGER.debug("Бэйджик игрока {} закэширован: {}", playerUuid, badge.getName());
-					} else {
-						// Кэшируем null на короткое время, чтобы не спамить API
-						// Но не сохраняем в кэш, чтобы при следующем запросе попробовать снова
-						LOGGER.debug("Игрок {} не имеет бэйджика", playerUuid);
 					}
 					return badge;
 				});
+	}
+
+	/**
+	 * Получает бэйджик из кэша без запроса к API
+	 * @param playerUuid UUID игрока
+	 * @return бэйджик или null, если не найден в кэше
+	 */
+	public Badge getCachedBadge(UUID playerUuid) {
+		return cache.get(playerUuid);
 	}
 
 	/**
