@@ -1,4 +1,4 @@
-package com.example.polystirolbagdes.core;
+package com.example.polystirolutility.core;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;

@@ -1,12 +1,12 @@
-package com.example.polystirolbagdes.neoforge;
+package com.example.polystirolutility.neoforge;
 
 import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.example.polystirolbagdes.core.Badge;
-import com.example.polystirolbagdes.core.BadgeService;
+import com.example.polystirolutility.core.Badge;
+import com.example.polystirolutility.core.BadgeService;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;

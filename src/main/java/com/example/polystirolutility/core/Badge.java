@@ -1,4 +1,4 @@
-package com.example.polystirolbagdes.core;
+package com.example.polystirolutility.core;
 
 import java.time.Instant;
 import java.util.UUID;

@@ -1,4 +1,4 @@
-package com.example.polystirolbagdes;
+package com.example.polystirolutility;
 
 import java.util.UUID;
 
@@ -14,6 +14,10 @@ public class Config {
 	public static final ModConfigSpec.ConfigValue<String> SERVER_ID = BUILDER
 			.comment("UUID сервера для запроса информации о resource pack")
 			.define("serverId", "");
+
+	public static final ModConfigSpec.ConfigValue<String> SERVER_UUID = BUILDER
+			.comment("UUID сервера для отправки данных о сборе ресурсов (формат: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)")
+			.define("serverUuid", "");
 
 	public static final ModConfigSpec.IntValue CACHE_TTL_SECONDS = BUILDER
 			.comment("Время жизни кэша бэйджиков в секундах")
@@ -37,8 +41,33 @@ public class Config {
 		try {
 			return UUID.fromString(serverIdStr);
 		} catch (IllegalArgumentException e) {
-			polystirolbagdes.LOGGER.error("Неверный формат serverId в конфиге: {}", serverIdStr);
+			PolystirolUtility.LOGGER.error("Неверный формат serverId в конфиге: {}", serverIdStr);
+			return null;
+		}
+	}
+
+	/**
+	 * Получает UUID сервера для сбора ресурсов из конфига
+	 * @return UUID строка или null, если неверный формат
+	 */
+	public static String getServerUuid() {
+		String serverUuidStr = SERVER_UUID.get();
+		if (serverUuidStr == null || serverUuidStr.isEmpty()) {
+			return null;
+		}
+		// Проверяем формат UUID (36 символов с дефисами)
+		if (serverUuidStr.length() != 36) {
+			PolystirolUtility.LOGGER.error("Неверный формат serverUuid в конфиге (должно быть 36 символов): {}", serverUuidStr);
+			return null;
+		}
+		// Проверяем, что это валидный UUID
+		try {
+			UUID.fromString(serverUuidStr);
+			return serverUuidStr;
+		} catch (IllegalArgumentException e) {
+			PolystirolUtility.LOGGER.error("Неверный формат serverUuid в конфиге: {}", serverUuidStr);
 			return null;
 		}
 	}
 }
+

@@ -1,4 +1,4 @@
-package com.example.polystirolbagdes.core;
+package com.example.polystirolutility.core;
 
 import java.io.IOException;
 import java.net.URI;

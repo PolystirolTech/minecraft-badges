@@ -1,4 +1,4 @@
-package com.example.polystirolbagdes.neoforge;
+package com.example.polystirolutility.neoforge;
 
 import java.lang.reflect.Method;
 import java.util.UUID;
@@ -6,7 +6,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.example.polystirolbagdes.core.Badge;
+import com.example.polystirolutility.core.Badge;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
