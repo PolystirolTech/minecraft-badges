@@ -27,7 +27,6 @@ public class ResourceTypeMapper {
 		ITEM_TO_RESOURCE_TYPE.put(Items.DARK_OAK_PLANKS, "wood");
 		ITEM_TO_RESOURCE_TYPE.put(Items.MANGROVE_PLANKS, "wood");
 		ITEM_TO_RESOURCE_TYPE.put(Items.CHERRY_PLANKS, "wood");
-		ITEM_TO_RESOURCE_TYPE.put(Items.STICK, "wood");
 
 		// Камень
 		ITEM_TO_RESOURCE_TYPE.put(Items.STONE, "stone");
@@ -83,6 +82,11 @@ public class ResourceTypeMapper {
 		ITEM_TO_RESOURCE_TYPE.put(Items.REDSTONE, "redstone");
 		ITEM_TO_RESOURCE_TYPE.put(Items.REDSTONE_ORE, "redstone");
 		ITEM_TO_RESOURCE_TYPE.put(Items.DEEPSLATE_REDSTONE_ORE, "redstone");
+
+		// Новые ресурсы
+		ITEM_TO_RESOURCE_TYPE.put(Items.ENDER_EYE, "ender_eye");
+		ITEM_TO_RESOURCE_TYPE.put(Items.NETHERITE_INGOT, "netherite");
+		ITEM_TO_RESOURCE_TYPE.put(Items.BLAZE_ROD, "blaze_rod");
 	}
 
 	/**
