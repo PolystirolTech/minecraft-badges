@@ -94,6 +94,43 @@ public class ResourceCollectionApiClient {
 				});
 	}
 
+	/**
+	 * Получает список активных целей для сервера
+	 * @param serverUuid UUID сервера
+	 * @return CompletableFuture с ответом или null при ошибке
+	 */
+	public CompletableFuture<ResourceProgressResponse> getResourceGoals(String serverUuid) {
+		if (serverUuid == null || serverUuid.length() != 36) {
+			return CompletableFuture.failedFuture(new IllegalArgumentException("serverUuid должен быть 36 символов"));
+		}
+
+		String url = baseUrl + "/resource-collection/servers/" + serverUuid + "/progress";
+		HttpRequest httpRequest = HttpRequest.newBuilder()
+				.uri(URI.create(url))
+				.timeout(REQUEST_TIMEOUT)
+				.GET()
+				.build();
+
+		return httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString())
+				.thenApply(response -> {
+					if (response.statusCode() == 200) {
+						try {
+							return gson.fromJson(response.body(), ResourceProgressResponse.class);
+						} catch (JsonParseException e) {
+							LOGGER.error("Ошибка парсинга JSON ответа (цели): {}", e.getMessage());
+							throw new ApiException("Ошибка парсинга JSON", response.statusCode(), e);
+						}
+					} else {
+						LOGGER.error("Ошибка получения целей: код {}", response.statusCode());
+						throw new ApiException("Ошибка получения целей", response.statusCode());
+					}
+				})
+				.exceptionally(throwable -> {
+					LOGGER.error("Ошибка при получении списка целей: {}", throwable.getMessage());
+					return null;
+				});
+	}
+
 	private CompletableFuture<ResourceCollectionResponse> retryRequest(HttpRequest request, int lastStatusCode) {
 		CompletableFuture<ResourceCollectionResponse> retryFuture = new CompletableFuture<>();
 		

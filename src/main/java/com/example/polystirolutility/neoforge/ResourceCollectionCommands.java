@@ -79,7 +79,7 @@ public class ResourceCollectionCommands {
 			// Собираем все предметы из контейнера
 			ItemStack[] items = new ItemStack[container.getContainerSize()];
 			for (int i = 0; i < container.getContainerSize(); i++) {
-				items[i] = container.getItem(i);
+				items[i] = container.getItem(i).copy(); // Копируем, чтобы не потерять данные при очистке (хотя мы не очищаем сразу теперь)
 			}
 
 			if (collectionService != null) {
@@ -97,17 +97,63 @@ public class ResourceCollectionCommands {
 						first = false;
 					}
 					player.sendSystemMessage(Component.literal(message.toString()));
+
+					// Удаляем ТОЛЬКО успешно отправленные предметы
+					for (int i = 0; i < container.getContainerSize(); i++) {
+						ItemStack stack = container.getItem(i);
+						if (!stack.isEmpty()) {
+							String type = com.example.polystirolutility.core.ResourceTypeMapper.getResourceType(stack.getItem());
+							if (type != null && sentCounts.containsKey(type)) {
+								// Пытаемся удалить количество, которое было отправлено
+								int sent = sentCounts.get(type);
+								int countInStack = stack.getCount();
+								
+								// У нас простой случай: API подтверждает только целые типы.
+								// Если в контейнере было 10 дерева в одном стаке и 5 в другом,
+								// sentCounts скажет "15". Нам нужно удалить 15 дерева из контейнера.
+								
+								if (sent > 0) {
+									int toRemove = Math.min(sent, countInStack);
+									stack.shrink(toRemove);
+									sentCounts.put(type, sent - toRemove); // Уменьшаем остаток для удаления
+									container.setItem(i, stack); // Обновляем слот (если стало 0, станет EMPTY)
+								}
+							}
+						}
+					}
 				} else {
-					player.sendSystemMessage(Component.literal("Нет ресурсов для отправки"));
+					player.sendSystemMessage(Component.literal("Нет ресурсов для отправки (или нет активных целей)"));
 				}
 
-				// Очищаем контейнер (предметы уже отправлены)
+				// Оставшиеся предметы будут возвращены игроку автоматически, так как мы не удалили их из Container
+				// Однако, ResourceCollectionMenu.removed НЕ делает этого по умолчанию для SimpleContainer.
+				// Нам нужно вручную вернуть оставшиеся предметы игроку.
+				
 				for (int i = 0; i < container.getContainerSize(); i++) {
-					container.setItem(i, ItemStack.EMPTY);
+					ItemStack stack = container.getItem(i);
+					if (!stack.isEmpty()) {
+						if (player.getInventory().add(stack)) {
+							// Успешно добавлено в инвентарь
+							container.setItem(i, ItemStack.EMPTY);
+						} else {
+							// Инвентарь полон, выбрасываем рядом
+							player.drop(stack, false);
+							container.setItem(i, ItemStack.EMPTY);
+						}
+					}
 				}
 			} else {
 				LOGGER.warn("ResourceCollectionService не инициализирован");
 				player.sendSystemMessage(Component.literal("Ошибка: сервис не инициализирован"));
+				
+				// Возвращаем все предметы
+				for (int i = 0; i < container.getContainerSize(); i++) {
+					ItemStack stack = container.getItem(i);
+					if (!stack.isEmpty()) {
+						player.getInventory().add(stack); // Или drop
+						container.setItem(i, ItemStack.EMPTY);
+					}
+				}
 			}
 		}
 	}
