@@ -13,6 +13,8 @@ import com.example.polystirolutility.core.ResourcePackManager;
 import com.example.polystirolutility.neoforge.BadgeEventHandler;
 import com.example.polystirolutility.neoforge.ResourceCollectionCommands;
 import com.example.polystirolutility.neoforge.TabIntegration;
+import com.example.polystirolutility.neoforge.AFKManager;
+import com.example.polystirolutility.neoforge.AFKCommand;
 import com.mojang.logging.LogUtils;
 
 import net.minecraft.server.MinecraftServer;
@@ -35,6 +37,7 @@ public class PolystirolUtility {
 	private ResourceCollectionApiClient resourceCollectionApiClient;
 	private ResourceCollectionService resourceCollectionService;
 	private ResourceCollectionCommands resourceCollectionCommands;
+	private AFKManager afkManager;
 
 
 	public PolystirolUtility(IEventBus modEventBus, ModContainer modContainer) {
@@ -125,6 +128,15 @@ public class PolystirolUtility {
 		// Регистрируем обработчик событий для закрытия GUI
 		net.neoforged.neoforge.common.NeoForge.EVENT_BUS.register(resourceCollectionCommands);
 		LOGGER.info("Команда /collect зарегистрирована");
+		
+		// Инициализация AFK модуля
+		afkManager = new AFKManager(server);
+		// Регистрируем обработчик событий AFK (тиков и игроков)
+		afkManager.register(net.neoforged.neoforge.common.NeoForge.EVENT_BUS);
+		
+		// Регистрируем команду /afk
+		new AFKCommand(afkManager).register(server.getCommands().getDispatcher());
+		LOGGER.info("AFK модуль инициализирован");
 	}
 }
 

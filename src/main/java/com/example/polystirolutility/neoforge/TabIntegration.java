@@ -90,6 +90,23 @@ public class TabIntegration {
 		} else {
 			pendingBadges.remove(playerUuid);
 		}
+		// Обновляем префикс, если игрок в сети и TAB доступен
+		refreshPlayerPrefix(playerUuid);
+	}
+
+	// Хранение AFK статуса игроков
+	private static final java.util.Set<UUID> afkPlayers = java.util.concurrent.ConcurrentHashMap.newKeySet();
+
+	/**
+	 * Устанавливает AFK статус для игрока
+	 */
+	public static void setAfkStatus(UUID playerUuid, boolean isAfk) {
+		if (isAfk) {
+			afkPlayers.add(playerUuid);
+		} else {
+			afkPlayers.remove(playerUuid);
+		}
+		refreshPlayerPrefix(playerUuid);
 	}
 
 	private static boolean eventBusRegistered = false;
@@ -173,10 +190,12 @@ public class TabIntegration {
 									Method getUniqueIdMethod = tabPlayer.getClass().getMethod("getUniqueId");
 									UUID playerUuid = (UUID) getUniqueIdMethod.invoke(tabPlayer);
 									
-									// Проверяем, есть ли ожидающий бэйджик для этого игрока
+									// Проверяем, есть ли ожидающий бэйджик или AFK статус
 									Badge pendingBadge = pendingBadges.get(playerUuid);
-									if (pendingBadge != null) {
-										setPlayerPrefixDirectly(tabPlayer, pendingBadge);
+									boolean isAfk = afkPlayers.contains(playerUuid);
+									
+									if (pendingBadge != null || isAfk) {
+										setPlayerPrefixDirectly(tabPlayer, pendingBadge, isAfk);
 									} else {
 										// Планируем повторную проверку через 1 секунду
 										java.util.concurrent.ScheduledExecutorService scheduler = 
@@ -189,9 +208,8 @@ public class TabIntegration {
 										scheduler.schedule(() -> {
 											try {
 												Badge delayedBadge = pendingBadges.get(playerUuid);
-												if (delayedBadge != null) {
-													setPlayerPrefixDirectly(tabPlayer, delayedBadge);
-												}
+												boolean nowAfk = afkPlayers.contains(playerUuid);
+												setPlayerPrefixDirectly(tabPlayer, delayedBadge, nowAfk);
 											} finally {
 												scheduler.shutdown();
 											}
@@ -223,9 +241,10 @@ public class TabIntegration {
 	/**
 	 * Устанавливает префикс напрямую для TabPlayer (используется из PlayerLoadEvent)
 	 * @param tabPlayer TabPlayer объект
-	 * @param badge бэйджик или null для удаления префикса
+	 * @param badge бэйджик или null
+	 * @param isAfk находится ли игрок в AFK
 	 */
-	private static void setPlayerPrefixDirectly(Object tabPlayer, Badge badge) {
+	private static void setPlayerPrefixDirectly(Object tabPlayer, Badge badge, boolean isAfk) {
 		if (!ensureInitialized()) {
 			LOGGER.error("TAB не инициализирован при попытке установить префикс");
 			return;
@@ -238,14 +257,25 @@ public class TabIntegration {
 			String unicodePrefix = null;
 			if (badge != null) {
 				String unicodeString = badge.getUnicodeString();
-				if (unicodeString.isEmpty()) {
+				if (!unicodeString.isEmpty()) {
+					unicodePrefix = unicodeString;
+				} else {
 					LOGGER.warn("Неверный Unicode символ для бэйджика {}: {}", badge.getId(), badge.getUnicodeChar());
-					return;
 				}
-				unicodePrefix = unicodeString;
 			}
 			
-			executeTabPrefixCommand(playerName, unicodePrefix);
+			// Формируем полный префикс: [AFK] + Badge
+			StringBuilder finalPrefix = new StringBuilder();
+			if (isAfk) {
+				finalPrefix.append("&7[AFK]&r ");
+			}
+			if (unicodePrefix != null) {
+				finalPrefix.append(unicodePrefix);
+			}
+			
+			String resultPrefix = finalPrefix.length() > 0 ? finalPrefix.toString() : null;
+			
+			executeTabPrefixCommand(playerName, resultPrefix);
 		} catch (Exception e) {
 			LOGGER.error("Ошибка при установке префикса: {}", e.getMessage(), e);
 		}
@@ -302,13 +332,22 @@ public class TabIntegration {
 			pendingBadges.remove(playerUuid);
 		}
 		
+		refreshPlayerPrefix(playerUuid);
+	}
+
+	/**
+	 * Обновляет префикс игрока на основе его Badge и AFK статуса
+	 */
+	private static void refreshPlayerPrefix(UUID playerUuid) {
 		// Пробуем установить сразу, если игрок уже загружен в TAB
 		if (ensureInitialized()) {
 			try {
 				Method getPlayerMethod = tabApi.getClass().getMethod("getPlayer", UUID.class);
 				Object tabPlayer = getPlayerMethod.invoke(tabApi, playerUuid);
 				if (tabPlayer != null) {
-					setPlayerPrefixDirectly(tabPlayer, badge);
+					Badge badge = pendingBadges.get(playerUuid);
+					boolean isAfk = afkPlayers.contains(playerUuid);
+					setPlayerPrefixDirectly(tabPlayer, badge, isAfk);
 				}
 			} catch (Exception e) {
 				// Игнорируем ошибки получения игрока из TAB
