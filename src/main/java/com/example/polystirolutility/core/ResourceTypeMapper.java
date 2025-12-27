@@ -87,6 +87,7 @@ public class ResourceTypeMapper {
 		ITEM_TO_RESOURCE_TYPE.put(Items.ENDER_EYE, "ender_eye");
 		ITEM_TO_RESOURCE_TYPE.put(Items.NETHERITE_INGOT, "netherite");
 		ITEM_TO_RESOURCE_TYPE.put(Items.BLAZE_ROD, "blaze_rod");
+		ITEM_TO_RESOURCE_TYPE.put(Items.NETHER_STAR, "nether_star");
 	}
 
 	/**
