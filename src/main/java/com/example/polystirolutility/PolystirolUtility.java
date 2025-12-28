@@ -25,6 +25,7 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 
 @Mod(PolystirolUtility.MODID)
@@ -124,7 +125,7 @@ public class PolystirolUtility {
 		} else {
 			LOGGER.warn("serverUuid не настроен в конфиге, команда /collect будет доступна, но функционал не будет работать");
 		}
-		resourceCollectionCommands.register(event.getServer().getCommands().getDispatcher());
+		// NOTE: команды регистрируются в onRegisterCommands для поддержки /reload
 		// Регистрируем обработчик событий для закрытия GUI
 		net.neoforged.neoforge.common.NeoForge.EVENT_BUS.register(resourceCollectionCommands);
 		LOGGER.info("Команда /collect зарегистрирована");
@@ -134,9 +135,19 @@ public class PolystirolUtility {
 		// Регистрируем обработчик событий AFK (тиков и игроков)
 		afkManager.register(net.neoforged.neoforge.common.NeoForge.EVENT_BUS);
 		
-		// Регистрируем команду /afk
-		new AFKCommand(afkManager).register(server.getCommands().getDispatcher());
+		// NOTE: команды регистрируются в onRegisterCommands для поддержки /reload
 		LOGGER.info("AFK модуль инициализирован");
+	}
+
+	@SubscribeEvent
+	public void onRegisterCommands(RegisterCommandsEvent event) {
+		// Регистрируем команды при старте сервера и после /reload
+		if (resourceCollectionCommands != null) {
+			resourceCollectionCommands.register(event.getDispatcher());
+		}
+		if (afkManager != null) {
+			new AFKCommand(afkManager).register(event.getDispatcher());
+		}
 	}
 }
 
