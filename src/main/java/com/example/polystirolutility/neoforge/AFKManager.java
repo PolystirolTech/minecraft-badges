@@ -92,6 +92,7 @@ public class AFKManager {
 			if (afkPlayers.contains(uuid) && lastLocation != null) {
 				setAfk(player, false);
 				player.sendSystemMessage(Component.literal("§7Вы вернулись. Статус AFK снят."));
+				broadcastAfkMessage(player, false);
 			}
 		} else {
 			// Игрок стоит на месте
